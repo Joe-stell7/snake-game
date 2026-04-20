@@ -33,14 +33,19 @@ class GamePanel extends JPanel {
     private static final int RIGHT = 3;
     
     private LinkedList<Point> snakeSegments;
+    private Point food;
     private int direction = RIGHT;
     private int nextDirection = RIGHT;
+    private int score = 0;
+    private boolean gameOver = false;
     private javax.swing.Timer gameTimer;
+    private Random random;
     
     public GamePanel() {
         setBackground(new Color(40, 40, 40)); // Dark gray
         setPreferredSize(new java.awt.Dimension(PANEL_SIZE, PANEL_SIZE));
         setFocusable(true);
+        random = new Random();
         snakeSegments = new LinkedList<>();
         
         // Initialize snake with 3 segments, starting near center, facing right
@@ -48,6 +53,9 @@ class GamePanel extends JPanel {
         snakeSegments.add(new Point(10, 10)); // Head
         snakeSegments.add(new Point(9, 10));  // Body
         snakeSegments.add(new Point(8, 10));  // Tail
+        
+        // Spawn initial food
+        spawnFood();
         
         // Add keyboard listener
         addKeyListener(new KeyAdapter() {
@@ -62,21 +70,58 @@ class GamePanel extends JPanel {
         gameTimer.start();
     }
     
+    private void spawnFood() {
+        Point newFood;
+        boolean valid;
+        do {
+            valid = true;
+            newFood = new Point(random.nextInt(GRID_WIDTH), random.nextInt(GRID_HEIGHT));
+            // Check if food spawns on snake
+            for (Point segment : snakeSegments) {
+                if (segment.equals(newFood)) {
+                    valid = false;
+                    break;
+                }
+            }
+        } while (!valid);
+        food = newFood;
+    }
+    
     private void handleKeyPress(KeyEvent e) {
         int key = e.getKeyCode();
         
-        if (key == KeyEvent.VK_UP && direction != DOWN) {
-            nextDirection = UP;
-        } else if (key == KeyEvent.VK_DOWN && direction != UP) {
-            nextDirection = DOWN;
-        } else if (key == KeyEvent.VK_LEFT && direction != RIGHT) {
-            nextDirection = LEFT;
-        } else if (key == KeyEvent.VK_RIGHT && direction != LEFT) {
-            nextDirection = RIGHT;
+        if (key == KeyEvent.VK_R && gameOver) {
+            resetGame();
+        } else if (!gameOver) {
+            if (key == KeyEvent.VK_UP && direction != DOWN) {
+                nextDirection = UP;
+            } else if (key == KeyEvent.VK_DOWN && direction != UP) {
+                nextDirection = DOWN;
+            } else if (key == KeyEvent.VK_LEFT && direction != RIGHT) {
+                nextDirection = LEFT;
+            } else if (key == KeyEvent.VK_RIGHT && direction != LEFT) {
+                nextDirection = RIGHT;
+            }
         }
     }
     
+    private void resetGame() {
+        snakeSegments.clear();
+        snakeSegments.add(new Point(10, 10)); // Head
+        snakeSegments.add(new Point(9, 10));  // Body
+        snakeSegments.add(new Point(8, 10));  // Tail
+        direction = RIGHT;
+        nextDirection = RIGHT;
+        score = 0;
+        gameOver = false;
+        spawnFood();
+    }
+    
     private void moveSnake() {
+        if (gameOver) {
+            return;
+        }
+        
         direction = nextDirection;
         
         // Get current head position
@@ -99,18 +144,39 @@ class GamePanel extends JPanel {
                 break;
         }
         
-        // Wrap around edges
-        newHead.x = (newHead.x + GRID_WIDTH) % GRID_WIDTH;
-        newHead.y = (newHead.y + GRID_HEIGHT) % GRID_HEIGHT;
+        // Handle collision with walls
+        if (newHead.x < 0 || newHead.x >= GRID_WIDTH || newHead.y < 0 || newHead.y >= GRID_HEIGHT) {
+            endGame();
+            return;
+        }
+        
+        // Handle collision with own body
+        for (Point segment : snakeSegments) {
+            if (segment.equals(newHead)) {
+                endGame();
+                return;
+            }
+        }
         
         // Add new head
         snakeSegments.addFirst(newHead);
         
-        // Remove tail to keep snake the same length
-        snakeSegments.removeLast();
+        // Check if food is eaten
+        if (newHead.equals(food)) {
+            score += 10;
+            spawnFood();
+        } else {
+            // Remove tail to keep snake the same length (unless food was eaten)
+            snakeSegments.removeLast();
+        }
         
         // Repaint
         repaint();
+    }
+    
+    private void endGame() {
+        gameOver = true;
+        gameTimer.stop();
     }
     
     @Override
@@ -131,6 +197,41 @@ class GamePanel extends JPanel {
         g2d.setColor(new Color(0, 255, 0));
         for (Point segment : snakeSegments) {
             g2d.fillRect(segment.x * CELL_SIZE, segment.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+        
+        // Draw food in red
+        if (food != null) {
+            g2d.setColor(new Color(255, 0, 0));
+            g2d.fillRect(food.x * CELL_SIZE, food.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+        
+        // Draw score in top-left
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 16));
+        g2d.drawString("Score: " + score, 10, 20);
+        
+        // Draw game over message
+        if (gameOver) {
+            g2d.setColor(new Color(0, 0, 0, 200)); // Semi-transparent black
+            g2d.fillRect(0, 0, PANEL_SIZE, PANEL_SIZE);
+            
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Arial", Font.BOLD, 48));
+            String gameOverText = "Game Over";
+            FontMetrics fm = g2d.getFontMetrics();
+            int x = (PANEL_SIZE - fm.stringWidth(gameOverText)) / 2;
+            int y = (PANEL_SIZE / 2) - 40;
+            g2d.drawString(gameOverText, x, y);
+            
+            g2d.setFont(new Font("Arial", Font.BOLD, 28));
+            String scoreText = "Final Score: " + score;
+            int scoreX = (PANEL_SIZE - g2d.getFontMetrics().stringWidth(scoreText)) / 2;
+            g2d.drawString(scoreText, scoreX, y + 60);
+            
+            g2d.setFont(new Font("Arial", Font.PLAIN, 18));
+            String resetText = "Press R to play again";
+            int resetX = (PANEL_SIZE - g2d.getFontMetrics().stringWidth(resetText)) / 2;
+            g2d.drawString(resetText, resetX, y + 110);
         }
     }
 }
