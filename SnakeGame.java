@@ -115,6 +115,8 @@ class GamePanel extends JPanel {
         score = 0;
         gameOver = false;
         spawnFood();
+        gameTimer.start();
+        repaint();
     }
     
     private void moveSnake() {
@@ -177,6 +179,7 @@ class GamePanel extends JPanel {
     private void endGame() {
         gameOver = true;
         gameTimer.stop();
+        repaint();
     }
     
     @Override
@@ -205,33 +208,38 @@ class GamePanel extends JPanel {
             g2d.fillRect(food.x * CELL_SIZE, food.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         }
         
-        // Draw score in top-left
+        // Draw score in top-left (before game over overlay so it appears on top)
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.BOLD, 16));
-        g2d.drawString("Score: " + score, 10, 20);
+        g2d.setFont(new Font("Arial", Font.BOLD, 18));
+        g2d.drawString("Score: " + score, 15, 35);
         
         // Draw game over message
         if (gameOver) {
-            g2d.setColor(new Color(0, 0, 0, 200)); // Semi-transparent black
-            g2d.fillRect(0, 0, PANEL_SIZE, PANEL_SIZE);
+            int panelWidth = getWidth();
+            int panelHeight = getHeight();
+            
+            g2d.setColor(new Color(0, 0, 0, 200)); // Semi-transparent black overlay
+            g2d.fillRect(0, 0, panelWidth, panelHeight);
             
             g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Arial", Font.BOLD, 48));
-            String gameOverText = "Game Over";
+            g2d.setFont(new Font("Arial", Font.BOLD, 50));
+            String gameOverText = "GAME OVER";
             FontMetrics fm = g2d.getFontMetrics();
-            int x = (PANEL_SIZE - fm.stringWidth(gameOverText)) / 2;
-            int y = (PANEL_SIZE / 2) - 40;
+            int x = (panelWidth - fm.stringWidth(gameOverText)) / 2;
+            int y = (panelHeight / 2) - 60;
             g2d.drawString(gameOverText, x, y);
             
-            g2d.setFont(new Font("Arial", Font.BOLD, 28));
+            g2d.setFont(new Font("Arial", Font.BOLD, 32));
             String scoreText = "Final Score: " + score;
-            int scoreX = (PANEL_SIZE - g2d.getFontMetrics().stringWidth(scoreText)) / 2;
-            g2d.drawString(scoreText, scoreX, y + 60);
+            FontMetrics fm2 = g2d.getFontMetrics();
+            int scoreX = (panelWidth - fm2.stringWidth(scoreText)) / 2;
+            g2d.drawString(scoreText, scoreX, y + 80);
             
-            g2d.setFont(new Font("Arial", Font.PLAIN, 18));
+            g2d.setFont(new Font("Arial", Font.BOLD, 24));
             String resetText = "Press R to play again";
-            int resetX = (PANEL_SIZE - g2d.getFontMetrics().stringWidth(resetText)) / 2;
-            g2d.drawString(resetText, resetX, y + 110);
+            FontMetrics fm3 = g2d.getFontMetrics();
+            int resetX = (panelWidth - fm3.stringWidth(resetText)) / 2;
+            g2d.drawString(resetText, resetX, y + 140);
         }
     }
 }
