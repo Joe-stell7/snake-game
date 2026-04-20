@@ -242,7 +242,8 @@ class GamePanel extends JPanel {
             g2d.drawString(gameOverText, x, y);
             
             g2d.setFont(new Font("Arial", Font.BOLD, 32));
-            String scoreText = "Score: " + score + "  High Score: " + highScore;
+            String scoreText = "Score: " + score + "  High : " + highScore;
+            
             FontMetrics fm2 = g2d.getFontMetrics();
             int scoreX = (panelWidth - fm2.stringWidth(scoreText)) / 2;
             g2d.drawString(scoreText, scoreX, y + 80);
