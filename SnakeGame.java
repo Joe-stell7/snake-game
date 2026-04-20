@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.Font;
 import java.util.*;
 import java.util.prefs.Preferences;
 
@@ -32,6 +33,8 @@ class GamePanel extends JPanel {
     private static final int LEFT = 2;
     private static final int RIGHT = 3;
     
+    private int highScore = 0;
+    private Preferences prefs;
     private LinkedList<Point> snakeSegments;
     private Point food;
     private int direction = RIGHT;
@@ -48,6 +51,10 @@ class GamePanel extends JPanel {
         random = new Random();
         snakeSegments = new LinkedList<>();
         
+        // Load high score
+        prefs = Preferences.userNodeForPackage(GamePanel.class);
+        highScore = prefs.getInt("snakeHighScore", 0);
+
         // Initialize snake with 3 segments, starting near center, facing right
         // Head at (10, 10), body segments extending left
         snakeSegments.add(new Point(10, 10)); // Head
@@ -177,6 +184,10 @@ class GamePanel extends JPanel {
     }
     
     private void endGame() {
+        if ((score > highScore)) {
+            highScore = score;
+            prefs.putInt("snakeHighScore", highScore);
+        }
         gameOver = true;
         gameTimer.stop();
         repaint();
@@ -212,6 +223,7 @@ class GamePanel extends JPanel {
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 18));
         g2d.drawString("Score: " + score, 15, 35);
+        g2d.drawString("High: " + highScore, 15, 55);
         
         // Draw game over message
         if (gameOver) {
@@ -230,7 +242,7 @@ class GamePanel extends JPanel {
             g2d.drawString(gameOverText, x, y);
             
             g2d.setFont(new Font("Arial", Font.BOLD, 32));
-            String scoreText = "Final Score: " + score;
+            String scoreText = "Score: " + score + "  High Score: " + highScore;
             FontMetrics fm2 = g2d.getFontMetrics();
             int scoreX = (panelWidth - fm2.stringWidth(scoreText)) / 2;
             g2d.drawString(scoreText, scoreX, y + 80);
