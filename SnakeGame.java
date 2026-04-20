@@ -8,10 +8,11 @@ public class SnakeGame {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Snake");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(600, 600);
             
             GamePanel gamePanel = new GamePanel();
             frame.add(gamePanel);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
             frame.setVisible(true);
         });
     }
@@ -21,11 +22,13 @@ class GamePanel extends JPanel {
     private static final int GRID_WIDTH = 20;
     private static final int GRID_HEIGHT = 20;
     private static final int CELL_SIZE = 30;
+    private static final int PANEL_SIZE = GRID_WIDTH * CELL_SIZE; // 600
     
     private LinkedList<Point> snakeSegments;
     
     public GamePanel() {
         setBackground(new Color(40, 40, 40)); // Dark gray
+        setPreferredSize(new java.awt.Dimension(PANEL_SIZE, PANEL_SIZE));
         snakeSegments = new LinkedList<>();
         
         // Initialize snake with 3 segments, starting near center, facing right
