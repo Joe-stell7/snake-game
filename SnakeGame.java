@@ -223,7 +223,7 @@ class GamePanel extends JPanel {
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 18));
         g2d.drawString("Score: " + score, 15, 35);
-        g2d.drawString("High: " + highScore, 15, 55);
+        g2d.drawString("High Score: " + highScore, 15, 55);
         
         // Draw game over message
         if (gameOver) {
