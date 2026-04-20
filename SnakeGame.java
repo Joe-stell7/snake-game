@@ -222,9 +222,9 @@ class GamePanel extends JPanel {
         // Draw score in top-left (before game over overlay so it appears on top)
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 18));
-        g2d.drawString("Score: " + score, 15, 35);
+        g2d.drawString("Score: " + score, 15, 30);
         g2d.drawString("High Score: " + highScore, 15, 55);
-        
+            
         // Draw game over message
         if (gameOver) {
             int panelWidth = getWidth();
@@ -235,6 +235,7 @@ class GamePanel extends JPanel {
             
             g2d.setColor(Color.WHITE);
             g2d.setFont(new Font("Arial", Font.BOLD, 50));
+            
             String gameOverText = "GAME OVER";
             FontMetrics fm = g2d.getFontMetrics();
             int x = (panelWidth - fm.stringWidth(gameOverText)) / 2;
@@ -242,7 +243,7 @@ class GamePanel extends JPanel {
             g2d.drawString(gameOverText, x, y);
             
             g2d.setFont(new Font("Arial", Font.BOLD, 32));
-            String scoreText = "Score: " + score + "  High : " + highScore;
+            String scoreText = "Score: " + score + "  High Score : " + highScore;
             
             FontMetrics fm2 = g2d.getFontMetrics();
             int scoreX = (panelWidth - fm2.stringWidth(scoreText)) / 2;
