@@ -32,4 +32,6 @@ Prompt 7:Added a start screen main menu to the Snake game which changged ffrom p
 Had trouble with space not working but solve it by fixing space being blocked and undestected by other code.
 
 
-Prompt8:
+Prompt8: Added the ability to press P to pause the game mid playthorugh which freezez the snake into place and you can press P again to resume. Pressing space will instanlty reset the snake game and allow to spawn in a different location as well as where the food is.
+
+Prompt 9: 

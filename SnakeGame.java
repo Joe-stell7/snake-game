@@ -27,8 +27,8 @@ class GamePanel extends JPanel {
     private static final int PANEL_SIZE = GRID_WIDTH * CELL_SIZE;
     
     // Speed levels: 6 levels with decreasing delays (slower to faster)
-    private final int[] SPEED_LEVELS = {250, 200, 150, 125, 100, 75}; // ms for levels 1-6
-    private static final int POINTS_PER_LEVEL = 30; // Level up every 30 points (3 food)
+    private final int[] SPEED_LEVELS = {250, 200, 150, 125, 100, 75};
+    private static final int POINTS_PER_LEVEL = 30;
     
     // Direction constants
     private static final int UP = 0;
@@ -39,7 +39,7 @@ class GamePanel extends JPanel {
     private int highScore = 0;
     private int currentLevel = 1;
     private boolean showStartScreen = true;
-    private boolean paused = false;  // NEW - Pause functionality
+    private boolean paused = false;
     private Preferences prefs;
     private LinkedList<Point> snakeSegments;
     private Point food;
@@ -57,11 +57,9 @@ class GamePanel extends JPanel {
         random = new Random();
         snakeSegments = new LinkedList<>();
         
-        // Load high score
         prefs = Preferences.userNodeForPackage(GamePanel.class);
         highScore = prefs.getInt("snakeHighScore", 0);
 
-        // Initialize snake
         snakeSegments.add(new Point(10, 10));
         snakeSegments.add(new Point(9, 10));
         snakeSegments.add(new Point(8, 10));
@@ -75,7 +73,6 @@ class GamePanel extends JPanel {
             }
         });
         
-        // Create timer but don't start yet
         gameTimer = new javax.swing.Timer(SPEED_LEVELS[0], e -> moveSnake());
     }
     
@@ -98,24 +95,21 @@ class GamePanel extends JPanel {
     private void handleKeyPress(KeyEvent e) {
         int key = e.getKeyCode();
         
-        // SPACE ALWAYS resets/starts
         if (key == KeyEvent.VK_SPACE) {
             resetGame();
             return;
         }
         
-        // P toggles pause (works anytime except start screen)
         if (key == KeyEvent.VK_P && !showStartScreen) {
             paused = !paused;
             if (!paused) {
-                gameTimer.start();  // Resume
+                gameTimer.start();
             } else {
-                gameTimer.stop();   // Pause
+                gameTimer.stop();
             }
             return;
         }
         
-        // Movement keys ONLY during active gameplay AND not paused
         if (!showStartScreen && !gameOver && !paused) {
             if (key == KeyEvent.VK_UP && direction != DOWN) {
                 nextDirection = UP;
@@ -130,7 +124,6 @@ class GamePanel extends JPanel {
     }
     
     private void resetGame() {
-        // FULL CLEAN RESET
         snakeSegments.clear();
         snakeSegments.add(new Point(10, 10));
         snakeSegments.add(new Point(9, 10));
@@ -140,17 +133,16 @@ class GamePanel extends JPanel {
         score = 0;
         currentLevel = 1;
         gameOver = false;
-        paused = false;  // Reset pause state
-        showStartScreen = false;  // HIDE start screen
+        paused = false;
+        showStartScreen = false;
         spawnFood();
         gameTimer.stop();
         gameTimer.setDelay(SPEED_LEVELS[0]);
-        gameTimer.start();  // START THE GAME
+        gameTimer.start();
         repaint();
     }
     
     private void moveSnake() {
-        // STOP movement on start screen, game over, OR paused
         if (showStartScreen || gameOver || paused) {
             return;
         }
@@ -161,27 +153,17 @@ class GamePanel extends JPanel {
         Point newHead = new Point(head.x, head.y);
         
         switch (direction) {
-            case UP:
-                newHead.y--;
-                break;
-            case DOWN:
-                newHead.y++;
-                break;
-            case LEFT:
-                newHead.x--;
-                break;
-            case RIGHT:
-                newHead.x++;
-                break;
+            case UP: newHead.y--; break;
+            case DOWN: newHead.y++; break;
+            case LEFT: newHead.x--; break;
+            case RIGHT: newHead.x++; break;
         }
         
-        // Wall collision
         if (newHead.x < 0 || newHead.x >= GRID_WIDTH || newHead.y < 0 || newHead.y >= GRID_HEIGHT) {
             endGame();
             return;
         }
         
-        // Self collision
         for (Point segment : snakeSegments) {
             if (segment.equals(newHead)) {
                 endGame();
@@ -191,12 +173,10 @@ class GamePanel extends JPanel {
         
         snakeSegments.addFirst(newHead);
         
-        // Food eaten - check for level up
         if (newHead.equals(food)) {
             score += 10;
             spawnFood();
             
-            // Calculate new level (every 30 points = 1 level)
             int newLevel = Math.min((score / POINTS_PER_LEVEL) + 1, 6);
             if (newLevel > currentLevel) {
                 currentLevel = newLevel;
@@ -224,7 +204,6 @@ class GamePanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         
-        // START SCREEN - Draw FIRST (covers everything)
         if (showStartScreen) {
             g2d.setColor(Color.WHITE);
             g2d.setFont(new Font("Arial", Font.BOLD, 60));
@@ -244,7 +223,7 @@ class GamePanel extends JPanel {
             return;
         }
         
-        // GAME SCREEN - Draw grid
+        // Draw grid
         g2d.setColor(new Color(60, 60, 60));
         for (int i = 0; i <= GRID_WIDTH; i++) {
             g2d.drawLine(i * CELL_SIZE, 0, i * CELL_SIZE, GRID_HEIGHT * CELL_SIZE);
@@ -265,15 +244,21 @@ class GamePanel extends JPanel {
             g2d.fillRect(food.x * CELL_SIZE, food.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         }
         
-        // Draw info
+        // Draw info + CONTROL DISPLAY (TOP LEFT)
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.BOLD, 18));
-        g2d.drawString("Score: " + score, 15, 30);
-        g2d.drawString("High Score: " + highScore, 15, 55);
-        g2d.drawString("Level: " + currentLevel + "/6", 15, 80);
-        g2d.drawString("Speed: " + SPEED_LEVELS[currentLevel-1] + "ms", 15, 105);
+        g2d.setFont(new Font("Arial", Font.BOLD, 16));
         
-        // PAUSE OVERLAY
+        // Score/Level info
+        g2d.drawString("Score: " + score, 15, 25);
+        g2d.drawString("High: " + highScore, 15, 42);
+        g2d.drawString("Level: " + currentLevel + "/6", 15, 59);
+        g2d.drawString("Speed: " + SPEED_LEVELS[currentLevel-1] + "ms", 15, 76);
+        
+        // CONTROL BUTTONS DISPLAY - TOP LEFT
+        g2d.drawString("P: " + (paused ? "PAUSE" : "PAUSED"), 15, 100);
+        g2d.drawString("SPACE: RESTART", 15, 120);
+        
+        // PAUSE OVERLAY (covers everything when paused)
         if (paused) {
             g2d.setColor(new Color(0, 0, 0, 180));
             g2d.fillRect(0, 0, PANEL_SIZE, PANEL_SIZE);
@@ -290,35 +275,32 @@ class GamePanel extends JPanel {
             FontMetrics fmResume = g2d.getFontMetrics();
             int resumeX = (PANEL_SIZE - fmResume.stringWidth(resumeText)) / 2;
             g2d.drawString(resumeText, resumeX, PANEL_SIZE / 2 + 60);
-            return;  // Don't draw game over overlay
+            return;
         }
         
         // Game over overlay
         if (gameOver) {
-            int panelWidth = getWidth();
-            int panelHeight = getHeight();
-            
             g2d.setColor(new Color(0, 0, 0, 200));
-            g2d.fillRect(0, 0, panelWidth, panelHeight);
+            g2d.fillRect(0, 0, PANEL_SIZE, PANEL_SIZE);
             
             g2d.setColor(Color.WHITE);
             g2d.setFont(new Font("Arial", Font.BOLD, 50));
             String gameOverText = "GAME OVER";
             FontMetrics fm = g2d.getFontMetrics();
-            int x = (panelWidth - fm.stringWidth(gameOverText)) / 2;
-            int y = (panelHeight / 2) - 60;
+            int x = (PANEL_SIZE - fm.stringWidth(gameOverText)) / 2;
+            int y = (PANEL_SIZE / 2) - 60;
             g2d.drawString(gameOverText, x, y);
             
             g2d.setFont(new Font("Arial", Font.BOLD, 32));
-            String scoreText = "Score: " + score + "  High Score: " + highScore;
+            String scoreText = "Score: " + score + "  High: " + highScore;
             FontMetrics fm2 = g2d.getFontMetrics();
-            int scoreX = (panelWidth - fm2.stringWidth(scoreText)) / 2;
+            int scoreX = (PANEL_SIZE - fm2.stringWidth(scoreText)) / 2;
             g2d.drawString(scoreText, scoreX, y + 80);
             
             g2d.setFont(new Font("Arial", Font.BOLD, 24));
             String resetText = "Press SPACE to Play Again";
             FontMetrics fm3 = g2d.getFontMetrics();
-            int resetX = (panelWidth - fm3.stringWidth(resetText)) / 2;
+            int resetX = (PANEL_SIZE - fm3.stringWidth(resetText)) / 2;
             g2d.drawString(resetText, resetX, y + 140);
         }
     }
