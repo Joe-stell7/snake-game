@@ -39,6 +39,7 @@ class GamePanel extends JPanel {
     private int highScore = 0;
     private int currentLevel = 1;
     private boolean showStartScreen = true;
+    private boolean paused = false;  // NEW - Pause functionality
     private Preferences prefs;
     private LinkedList<Point> snakeSegments;
     private Point food;
@@ -97,14 +98,25 @@ class GamePanel extends JPanel {
     private void handleKeyPress(KeyEvent e) {
         int key = e.getKeyCode();
         
-        // SPACE ALWAYS resets/starts (works from ANY state)
+        // SPACE ALWAYS resets/starts
         if (key == KeyEvent.VK_SPACE) {
             resetGame();
             return;
         }
         
-        // Movement keys ONLY during active gameplay
-        if (!showStartScreen && !gameOver) {
+        // P toggles pause (works anytime except start screen)
+        if (key == KeyEvent.VK_P && !showStartScreen) {
+            paused = !paused;
+            if (!paused) {
+                gameTimer.start();  // Resume
+            } else {
+                gameTimer.stop();   // Pause
+            }
+            return;
+        }
+        
+        // Movement keys ONLY during active gameplay AND not paused
+        if (!showStartScreen && !gameOver && !paused) {
             if (key == KeyEvent.VK_UP && direction != DOWN) {
                 nextDirection = UP;
             } else if (key == KeyEvent.VK_DOWN && direction != UP) {
@@ -128,6 +140,7 @@ class GamePanel extends JPanel {
         score = 0;
         currentLevel = 1;
         gameOver = false;
+        paused = false;  // Reset pause state
         showStartScreen = false;  // HIDE start screen
         spawnFood();
         gameTimer.stop();
@@ -137,8 +150,8 @@ class GamePanel extends JPanel {
     }
     
     private void moveSnake() {
-        // STOP movement on start screen or game over
-        if (showStartScreen || gameOver) {
+        // STOP movement on start screen, game over, OR paused
+        if (showStartScreen || gameOver || paused) {
             return;
         }
         
@@ -259,6 +272,26 @@ class GamePanel extends JPanel {
         g2d.drawString("High Score: " + highScore, 15, 55);
         g2d.drawString("Level: " + currentLevel + "/6", 15, 80);
         g2d.drawString("Speed: " + SPEED_LEVELS[currentLevel-1] + "ms", 15, 105);
+        
+        // PAUSE OVERLAY
+        if (paused) {
+            g2d.setColor(new Color(0, 0, 0, 180));
+            g2d.fillRect(0, 0, PANEL_SIZE, PANEL_SIZE);
+            
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Arial", Font.BOLD, 50));
+            String pauseText = "PAUSED";
+            FontMetrics fmPause = g2d.getFontMetrics();
+            int pauseX = (PANEL_SIZE - fmPause.stringWidth(pauseText)) / 2;
+            g2d.drawString(pauseText, pauseX, PANEL_SIZE / 2);
+            
+            g2d.setFont(new Font("Arial", Font.BOLD, 24));
+            String resumeText = "Press P to Continue";
+            FontMetrics fmResume = g2d.getFontMetrics();
+            int resumeX = (PANEL_SIZE - fmResume.stringWidth(resumeText)) / 2;
+            g2d.drawString(resumeText, resumeX, PANEL_SIZE / 2 + 60);
+            return;  // Don't draw game over overlay
+        }
         
         // Game over overlay
         if (gameOver) {
