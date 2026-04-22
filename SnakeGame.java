@@ -25,7 +25,6 @@ class GamePanel extends JPanel {
     private static final int GRID_HEIGHT = 20;
     private static final int CELL_SIZE = 30;
     private static final int PANEL_SIZE = GRID_WIDTH * CELL_SIZE; // 600
-    private static final int TIMER_DELAY = 150; // milliseconds
     
     // Direction constants
     private static final int UP = 0;
@@ -44,7 +43,6 @@ class GamePanel extends JPanel {
     private javax.swing.Timer gameTimer;
     private Random random;
     private final int[] SPEED_LEVELS = {250, 200, 150, 125, 100, 75}; // Levels 1-6
-    private static final int POINTS_PER_LEVEL = 30; // Level up every 30 points
     private int currentLevel = 1;
 
     public GamePanel() {
