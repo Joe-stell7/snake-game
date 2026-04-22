@@ -43,7 +43,10 @@ class GamePanel extends JPanel {
     private boolean gameOver = false;
     private javax.swing.Timer gameTimer;
     private Random random;
-    
+    private final int[] SPEED_LEVELS = {250, 200, 150, 125, 100, 75}; // Levels 1-6
+    private static final int POINTS_PER_LEVEL = 30; // Level up every 30 points
+    private int currentLevel = 1;
+
     public GamePanel() {
         setBackground(new Color(40, 40, 40)); // Dark gray
         setPreferredSize(new java.awt.Dimension(PANEL_SIZE, PANEL_SIZE));
@@ -73,7 +76,7 @@ class GamePanel extends JPanel {
         });
         
         // Start game timer
-        gameTimer = new javax.swing.Timer(TIMER_DELAY, e -> moveSnake());
+        gameTimer = new javax.swing.Timer(SPEED_LEVELS[0], e -> moveSnake());
         gameTimer.start();
     }
     
@@ -120,6 +123,8 @@ class GamePanel extends JPanel {
         direction = RIGHT;
         nextDirection = RIGHT;
         score = 0;
+        currentLevel = 1;
+        gameTimer.setDelay(SPEED_LEVELS[0]);
         gameOver = false;
         spawnFood();
         gameTimer.start();
@@ -167,13 +172,19 @@ class GamePanel extends JPanel {
             }
         }
         
-        // Add new head
+        
         snakeSegments.addFirst(newHead);
         
         // Check if food is eaten
         if (newHead.equals(food)) {
             score += 10;
             spawnFood();
+        
+            int newlevel = Math.min((score / 30) + 1, 6);
+            if (newlevel != currentLevel) {
+                currentLevel = newlevel;
+                gameTimer.setDelay(SPEED_LEVELS[currentLevel - 1]);
+            }
         } else {
             // Remove tail to keep snake the same length (unless food was eaten)
             snakeSegments.removeLast();
@@ -224,7 +235,9 @@ class GamePanel extends JPanel {
         g2d.setFont(new Font("Arial", Font.BOLD, 18));
         g2d.drawString("Score: " + score, 15, 30);
         g2d.drawString("High Score: " + highScore, 15, 55);
-            
+        g2d.drawString("Level: " + currentLevel + "/6", 15, 80);
+        g2d.drawString("Speed: " + SPEED_LEVELS[currentLevel-1] + "ms", 15, 105);
+        
         // Draw game over message
         if (gameOver) {
             int panelWidth = getWidth();
