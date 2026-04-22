@@ -44,6 +44,7 @@ class GamePanel extends JPanel {
     private Random random;
     private final int[] SPEED_LEVELS = {250, 200, 150, 125, 100, 75}; // Levels 1-6
     private int currentLevel = 1;
+    private boolean showStartScreen = true;
 
     public GamePanel() {
         setBackground(new Color(40, 40, 40)); // Dark gray
@@ -75,7 +76,6 @@ class GamePanel extends JPanel {
         
         // Start game timer
         gameTimer = new javax.swing.Timer(SPEED_LEVELS[0], e -> moveSnake());
-        gameTimer.start();
     }
     
     private void spawnFood() {
@@ -96,39 +96,39 @@ class GamePanel extends JPanel {
     }
     
     private void handleKeyPress(KeyEvent e) {
-        int key = e.getKeyCode();
-        
-        if (key == KeyEvent.VK_R && gameOver) {
-            resetGame();
-        } else if (!gameOver) {
-            if (key == KeyEvent.VK_UP && direction != DOWN) {
-                nextDirection = UP;
-            } else if (key == KeyEvent.VK_DOWN && direction != UP) {
-                nextDirection = DOWN;
-            } else if (key == KeyEvent.VK_LEFT && direction != RIGHT) {
-                nextDirection = LEFT;
-            } else if (key == KeyEvent.VK_RIGHT && direction != LEFT) {
-                nextDirection = RIGHT;
-            }
+    int key = e.getKeyCode();
+    
+    // START SCREEN - Press SPACEBAR to begin game
+    if (key == KeyEvent.VK_SPACE && showStartScreen) {
+        showStartScreen = false;
+        gameTimer.start();  // Start the game timer
+        return;  // Exit method
+    }
+    
+    // GAME OVER - R restart (keeps working during game too)
+    if (key == KeyEvent.VK_R && gameOver) {
+        resetGame();
+    } else if (!gameOver) {  // Only direction keys during active game
+        if (key == KeyEvent.VK_UP && direction != DOWN) {
+            nextDirection = UP;
+        } else if (key == KeyEvent.VK_DOWN && direction != UP) {
+            nextDirection = DOWN;
+        } else if (key == KeyEvent.VK_LEFT && direction != RIGHT) {
+            nextDirection = LEFT;
+        } else if (key == KeyEvent.VK_RIGHT && direction != LEFT) {
+            nextDirection = RIGHT;
         }
     }
+}
     
     private void resetGame() {
-        snakeSegments.clear();
-        snakeSegments.add(new Point(10, 10)); // Head
-        snakeSegments.add(new Point(9, 10));  // Body
-        snakeSegments.add(new Point(8, 10));  // Tail
-        direction = RIGHT;
-        nextDirection = RIGHT;
-        score = 0;
-        currentLevel = 1;
-        gameTimer.setDelay(SPEED_LEVELS[0]);
-        gameOver = false;
-        spawnFood();
-        gameTimer.start();
-        repaint();
-    }
-    
+    // Return to START SCREEN (no restart anymore)
+    showStartScreen = true;
+    gameTimer.stop();
+    repaint();
+    return;
+}
+
     private void moveSnake() {
         if (gameOver) {
             return;
@@ -193,14 +193,15 @@ class GamePanel extends JPanel {
     }
     
     private void endGame() {
-        if ((score > highScore)) {
-            highScore = score;
-            prefs.putInt("snakeHighScore", highScore);
-        }
-        gameOver = true;
-        gameTimer.stop();
-        repaint();
+    if ((score > highScore)) {
+        highScore = score;
+        prefs.putInt("snakeHighScore", highScore);
     }
+    gameOver = true;
+    gameTimer.stop();
+    showStartScreen = true;  // Show start screen
+    repaint();
+}
     
     @Override
     protected void paintComponent(Graphics g) {
@@ -236,6 +237,22 @@ class GamePanel extends JPanel {
         g2d.drawString("Level: " + currentLevel + "/6", 15, 80);
         g2d.drawString("Speed: " + SPEED_LEVELS[currentLevel-1] + "ms", 15, 105);
         
+    if (showStartScreen) {
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 60));
+        String title = "SNAKE GAME";
+        FontMetrics fmTitle = g2d.getFontMetrics();
+        int titleX = (PANEL_SIZE - fmTitle.stringWidth(title)) / 2;
+        g2d.drawString(title, titleX, PANEL_SIZE / 2 - 40);
+    
+        g2d.setFont(new Font("Arial", Font.BOLD, 28));
+        String startMsg = "Press SPACE to Play";
+        FontMetrics fmStart = g2d.getFontMetrics();
+        int startX = (PANEL_SIZE - fmStart.stringWidth(startMsg)) / 2;
+        g2d.drawString(startMsg, startX, PANEL_SIZE / 2 + 30);
+        return;  // Hide game graphics
+}
+
         // Draw game over message
         if (gameOver) {
             int panelWidth = getWidth();
