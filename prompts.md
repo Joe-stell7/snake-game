@@ -28,4 +28,8 @@ Level and speed display on screen
 Resets to Level 1 on 'R' restart
 High score is still saved after losing.
 
-Prompt 7:
+Prompt 7:Added a start screen main menu to the Snake game which changged ffrom pressing R to Space. Also you can see your high score at the main menu and after losing pressing space instantly resest the game again. 
+Had trouble with space not working but solve it by fixing space being blocked and undestected by other code.
+
+
+Prompt8:
