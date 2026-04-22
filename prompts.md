@@ -18,3 +18,14 @@ Fixed
 Added missing Preferences import
 Used GamePanel.class for prefs node key
 "snakeHighScore" unique key prevents conflicts
+
+Prompt 6: Speed progression
+6 Levels each level will increase speed starting at 250 ms and increasing by 50 ms the first few level  than by 25 mms unti hitting a threshold of 75ms.
+The speed is displayed at the top left as well as the currentt level the player is currently on from 1-6.
+
+Speed increases automatically after eating food
+Level and speed display on screen
+Resets to Level 1 on 'R' restart
+High score is still saved after losing.
+
+Prompt 7:
