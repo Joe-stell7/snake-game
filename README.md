@@ -1,1 +1,4 @@
 # snake-game
+Final Progject Part 1:
+
+For my Snake Game final project, I built off of the snake game prompts from before persistent high score storage using Java's `Preferences` API (Prompt 5) that displays continuously in the top-left and still shows after restarting game. I implemented 6 progressive speed levels (Prompt 6) starting at 250ms and accelerating to 75ms, automatically increasing every 30 points 3 food eaten still showing in the top left display. (Prompt 7) added an start screen replacing the 'R' restart with SPACEBAR, showing high score on the main menu and fixing SPACE detection issues after a long debugging session. (Prompt 8) I added a pause functionality buttom with 'P' key toggle that freezes snake movement. (Prompt 9) I added permanent top-left control labels ("P: PAUSED" and "SPACE: RESTART") visible during gameplay.
