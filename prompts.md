@@ -29,7 +29,7 @@ Resets to Level 1 on 'R' restart
 High score is still saved after losing.
 
 Prompt 7:Added a start screen main menu to the Snake game which changged ffrom pressing R to Space. Also you can see your high score at the main menu and after losing pressing space instantly resest the game again. 
-Had trouble with space not working but solve it by fixing space being blocked and undestected by other code.
+Had trouble with space not working for quite a long time but solved it finally by fixing space being blocked and undetected by another code.
 
 Prompt8: Added the ability to press P to pause the game mid playthorugh which freezez the snake into place and you can press P again to resume. Pressing space will instanlty reset the snake game and allow to spawn in a different location as well as where the food is.
 
